@@ -36,34 +36,32 @@ function! maki#link#get_link(...) " {{{
   endif
 
   let l:link_rxs = [
-        \ {'type': 'wiki',     'rx': '\[\[\([^]]\+\)\]\]'},
-        \ {'type': 'markdown', 'rx': '!\?\[\([^]]\+\)\](\([^)]*\))'},
-        \ {'type': 'refdef',   'rx': '^\[\([^]]\+\)\]:\s\+\(.\+\)'},
-        \ {'type': 'reflink',  'rx': '!\?\[\([^]]\+\)\]\%(\[\([^]]*\)\]\)\?'},
-        \ {'type': 'none',     'rx': '\(`\+\).\{-}\1'},
-        \ ] " 'none' is not a link type; just used for ignoring code area
-  let _ = copy(l:link_rxs)
-  call map(_, '{''key'': v:key, ''idx'': match(a:1, v:val.rx)}')
-  call sort(_, {a, b -> a.idx < 0 ? 1 : b.idx < 0 ? -1 : a.idx - b.idx})
-  let l:first = _[0] " get the earliest match
+        \ ['none',     '\(`\+\).\{-}\1'],
+        \ ['wiki',     '\[\[\([^]]\+\)\]\]'],
+        \ ['markdown', '!\?\[\([^]]\+\)\](\([^)]*\))'],
+        \ ['refdef',   '^\[\([^]]\+\)\]:\s\+\(.\+\)'],
+        \ ['reflink',  '!\?\[\([^]]\+\)\]\%(\[\([^]]*\)\]\)\?'],
+        \ ] " 'none' is not a link type; just used for skipping code areas
 
-  if l:first.idx < 0 | return {'left': a:1, 'middle': ''} | endif
+  let l:rx = join(map(copy(l:link_rxs), 'v:val[1]'), '\|')
+  let [l:middle, l:start, l:end] = matchstrpos(a:1, l:rx)
+  if l:middle == '' | return {'left': a:1, 'middle': ''} | endif
+  let l:left = strpart(a:1, 0, l:start)
+  let l:right = strpart(a:1, l:end)
 
-  let l:first.type = l:link_rxs[l:first.key].type
-  let l:first.match = matchlist(a:1, l:link_rxs[l:first.key].rx, l:first.idx)
+  for [l:type, l:rx] in l:link_rxs " parse the matched string
+    let l:match = matchlist(l:middle, l:rx)
+    if !empty(l:match) | break | endif
+  endfor
 
-  let l:left = strpart(a:1, 0, l:first.idx)
-  let l:middle = l:first.match[0]
-  let l:right = strpart(a:1, l:first.idx + len(l:middle))
-
-  if l:first.type == 'none' " if first match is not valid, search further
+  if l:type == 'none'
     return call('s:next', [],
           \ {'left': l:left, 'middle': l:middle, 'right': l:right})
   else
-    let l:text = l:first.match[1]
-    let l:target = (l:first.match[2] == '') ? l:text : l:first.match[2]
+    let l:text = l:match[1]
+    let l:target = (l:match[2] == '') ? l:text : l:match[2]
     return {
-          \ 'type': l:first.type,
+          \ 'type': l:type,
           \ 'text': l:text, 'target': l:target,
           \ 'left': l:left, 'middle': l:middle, 'right': l:right,
           \ 'next': function('s:next'),
