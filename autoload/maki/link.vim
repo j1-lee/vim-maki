@@ -129,7 +129,7 @@ function! s:open() dict " {{{
     call maki#nav#goto_page(self.target, l:where)
   else
     let l:target = self.target
-    if l:target !~ '^https\?://'
+    if l:target !~ '^https\?://\|^/'
       let l:target = expand('%:h') . '/' . l:target
     endif
     let l:pipeout = join(systemlist('xdg-open ' . shellescape(l:target)))
