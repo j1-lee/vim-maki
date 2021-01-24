@@ -50,7 +50,7 @@ function! maki#link#get_link(...) " {{{
   let l:right = strpart(a:1, l:end)
 
   for [l:type, l:rx] in l:link_rxs " parse the matched string
-    let l:match = matchlist(l:middle, l:rx)
+    let l:match = matchlist(l:middle, (l:rx =~ '^^' ? l:rx : '^' . l:rx))
     if !empty(l:match) | break | endif
   endfor
 
