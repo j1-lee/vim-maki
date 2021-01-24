@@ -6,32 +6,43 @@ function! maki#nav#goto_page(fname, ...) " {{{
   " {fname} is understood to be relative to the wiki root. If {where} ==
   " 'journal', then relative to g:maki_journal. If {where} == 'relative', then
   " relative to the current page.
+  if &modified
+    echomsg 'Can''t open the link; write the buffer first.'
+    return
+  endif
+
   let l:prefix = !a:0 ? g:maki_root
         \ : a:1 == 'journal'  ? g:maki_journal
         \ : a:1 == 'relative' ? expand('%:h')
         \ : g:maki_root " else, e.g., 'wiki', then default to g:maki_root
 
-  let l:bufnr = bufnr()
+  call maki#nav#add_pos()
   execute 'edit' fnameescape(l:prefix . '/' . a:fname)
   augroup maki_mkdir_on_writing
     autocmd!
     autocmd BufWritePre <buffer> call mkdir(expand('%:h'), 'p')
   augroup END
-  let s:bufnr_prev = get(s:, 'bufnr_prev', []) + [l:bufnr]
 endfunction
 " }}}
-function! maki#nav#prev_page() " {{{
-  " Go back to the previously visited page.
+function! maki#nav#go_back() " {{{
+  " Go back to the last saved position.
 
-  if empty(get(s:, 'bufnr_prev', [])) | return | endif
+  if empty(get(s:, 'pos_prev', [])) | return | endif
   try
-    let l:bufnr = remove(s:bufnr_prev, -1)
+    let [l:bufnr, l:pos] = remove(s:pos_prev, -1)
     execute 'buffer' l:bufnr
+    call setpos('.', l:pos)
   catch /E37/
     echomsg 'Can''t go back; write the buffer first.'
-    call add(s:bufnr_prev, l:bufnr)
+    call add(s:pos_prev, l:pos)
   catch /E86/ " no such buffer
   endtry
+endfunction
+" }}}
+function! maki#nav#add_pos() " {{{
+  " Add current position to the previous positions stack.
+
+  let s:pos_prev = add(get(s:, 'pos_prev', []), [bufnr(), getcurpos()])
 endfunction
 " }}}
 function! maki#nav#next_heading(backwards, visual, ...) " {{{

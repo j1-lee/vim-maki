@@ -113,7 +113,13 @@ function! s:normalize() dict " {{{
     let self.target = _ . (_ =~ '/$' ? 'index.wiki' : '.wiki')
   elseif self.type == 'reflink'
     let [l:lnum, l:col] = searchpos('^\[\c' . self.target . '\]:\s\+', 'ne')
-    let self.target = strpart(getline(l:lnum), l:col)
+    if l:lnum
+      let self.target = strpart(getline(l:lnum), l:col)
+    else " try headings
+      let l:headings = maki#util#get_headings(1)
+      let l:idx = index(map(copy(l:headings), 'v:val.text'), trim(self.target))
+      let self.target = l:idx >= 0 ? 'lnum:' . l:headings[l:idx].lnum : ''
+    endif
   endif
   let self.target = trim(self.target)
 endfunction
@@ -127,6 +133,9 @@ function! s:open() dict " {{{
   elseif self.target =~ '\.wiki$'
     let l:where = (self.type == 'wiki') ? 'wiki' : 'relative'
     call maki#nav#goto_page(self.target, l:where)
+  elseif self.target =~ '^lnum:\d\+$' " internal link
+    call maki#nav#add_pos()
+    execute 'normal!' matchstr(self.target, '\d\+') . 'Gzvzt'
   else
     let l:target = self.target
     if l:target !~ '^https\?://\|^/'

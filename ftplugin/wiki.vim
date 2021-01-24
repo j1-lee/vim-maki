@@ -19,7 +19,7 @@ xnoremap <buffer> <Plug>maki-[[-v :<C-u>call maki#nav#next_heading(1, 1)<CR>
 
 nnoremap <buffer> <Plug>maki-link :call maki#link#try_link(0)<CR>
 xnoremap <buffer> <Plug>maki-link-v :<C-u>call maki#link#try_link(1)<CR>
-nnoremap <buffer> <Plug>maki-prev-page :call maki#nav#prev_page()<CR>
+nnoremap <buffer> <Plug>maki-go-back :call maki#nav#go_back()<CR>
 
 nnoremap <buffer> <Plug>maki-next-link :call maki#nav#next_link(0)<CR>
 nnoremap <buffer> <Plug>maki-prev-link :call maki#nav#next_link(1)<CR>
@@ -35,7 +35,7 @@ xmap <buffer> <silent> [[ <Plug>maki-[[-v
 
 nmap <buffer> <silent> <CR> <Plug>maki-link
 xmap <buffer> <silent> <CR> <Plug>maki-link-v
-nmap <buffer> <silent> <BS> <Plug>maki-prev-page
+nmap <buffer> <silent> <BS> <Plug>maki-go-back
 
 nmap <buffer> <silent> <Tab> <Plug>maki-next-link
 nmap <buffer> <silent> <S-Tab> <Plug>maki-prev-link
