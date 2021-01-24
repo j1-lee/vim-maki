@@ -43,7 +43,10 @@ function! maki#export#export(ext, view) " {{{
     if a:ext == 'md'
       call writefile(l:md, l:fname)
     else
-      let l:pipeout = join(systemlist(s:pandoc_cmd(l:fname), l:md))
+      let l:cmd = 'pandoc --from=markdown --output=' . shellescape(l:fname)
+      let l:cmd .= ' --standalone --shift-heading-level-by=-1'
+      if a:ext == 'html' | let l:cmd .= ' --mathjax' | endif
+      let l:pipeout = join(systemlist(l:cmd, l:md))
       if v:shell_error | throw l:pipeout | endif
     endif
   catch
@@ -54,29 +57,3 @@ function! maki#export#export(ext, view) " {{{
   if a:view | call system('xdg-open ' . shellescape(l:fname)) | endif
 endfunction
 " }}}
-function! s:pandoc_cmd(fname) " {{{
-  " Generate pandoc command to convert {fname} (in md format) to other formats.
-  "
-  " The included lua filter reads the level 1 heading and tells pandoc that
-  " this is the title of the document. It also removes the heading, as pandoc
-  " will separately insert the title in the document.
-
-  let l:lua_filter = '
-        \ local title
-        \ local function h1_to_title(header)
-        \   if header.level == 1 and not title then
-        \     title = header.content
-        \     return {}
-        \   end
-        \ end
-        \ return {
-        \   {Meta = function(meta) title = meta.title end},
-        \   {Header = h1_to_title},
-        \   {Meta = function(meta) meta.title = title return meta end}
-        \ }
-        \ '
-  let l:cmd = 'pandoc --from=markdown --output=' . shellescape(a:fname)
-  let l:cmd .= ' --standalone --lua-filter=<(echo ''' . l:lua_filter . ''')'
-  if fnamemodify(a:fname, ':e') == 'html' | let l:cmd .= ' --mathjax' | endif
-  return l:cmd
-endfunction " }}}
