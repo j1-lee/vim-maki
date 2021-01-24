@@ -5,6 +5,7 @@ setlocal foldexpr=maki#util#foldlevel(v:lnum) foldtext=getline(v:foldstart)
 command! -buffer MakiExportMarkdown call maki#export#export('md', 0)
 command! -buffer MakiExportHtml call maki#export#export('html', 0)
 command! -buffer MakiExportHtmlView call maki#export#export('html', 1)
+command! -buffer MakiUpdateToc call maki#list#update_toc()
 " }}}
 " <Plug> definitions {{{
 nnoremap <buffer> <Plug>maki-export-markdown :MakiExportMarkdown<CR>

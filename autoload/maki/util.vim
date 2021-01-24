@@ -53,3 +53,21 @@ function! maki#util#relative_to_root() " {{{
   return [l:from_root, join(_, '/')]
 endfunction
 " }}}
+function! maki#util#get_headings(minlevel) " {{{
+  " Get the list of headings
+  "
+  " Returns headings of level {minlevel}, {minlevel} + 1, ...
+
+  let l:is_pre = maki#util#is_pre()
+  let l:headings = []
+  for l:lnum in range(1, line('$'))
+    if l:is_pre[l:lnum - 1] | continue | endif
+    let l:match = matchlist(getline(l:lnum), '^\(#\+\)\(\s\+.*\)\?\s*$')
+    if empty(l:match) || len(l:match[1]) < a:minlevel | continue | endif
+    call add(l:headings,
+          \ {'lnum': l:lnum, 'level': len(l:match[1]), 'text': trim(l:match[2])}
+          \ )
+  endfor
+  return l:headings
+endfunction
+" }}}
