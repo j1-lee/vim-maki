@@ -107,7 +107,7 @@ function! s:normalize() dict " {{{
   " page). For {type} == 'reflink', fetch the definition.
 
   if self.type == 'wiki'
-    let _ = substitute(self.target, '[^-_/0-9a-zA-Z\u0100-\uFFFF]', '-', 'g')
+    let _ = substitute(self.target, '[^-_/0-9a-zA-Z\u00C0-\uFFFF]', '-', 'g')
     let _ = substitute(_, '-\{2,}', '-', 'g')
     let _ = trim(tolower(_), '-')
     let self.target = _ . (_ =~ '/$' ? 'index.wiki' : '.wiki')
