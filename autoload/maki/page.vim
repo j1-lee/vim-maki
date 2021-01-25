@@ -11,16 +11,18 @@ function! maki#page#export(ext, view) " {{{
   endif
 
   function! s:to_markdown(ext, to_root) dict
-    if self.type == 'reflink' | return | endif
-    call self.normalize()
-    let l:target = substitute(self.target, '\.\zswiki$', a:ext, '')
-    if self.type == 'refdef'
-      let self.middle = '[' . self.text . ']: ' . l:target
-    else
-      if self.type == 'wiki'
-        let l:target = simplify(a:to_root . '/' . l:target)
-      endif
+    if self.type == 'reflink'
+      return
+    elseif self.type == 'wiki'
+      let l:target = simplify(a:to_root . '/' . self.target . '.' . a:ext)
       let self.middle = '[' . self.text . '](' . l:target . ')'
+    else
+      let l:target = substitute(self.target, '\.\zswiki$', a:ext, '')
+      if self.type == 'refdef'
+        let self.middle = '[' . self.text . ']: ' . l:target
+      else
+        let self.middle = '[' . self.text . '](' . l:target . ')'
+      endif
     endif
   endfunction
 
@@ -29,9 +31,9 @@ function! maki#page#export(ext, view) " {{{
   let l:fhead = g:maki_export . '/' . l:from_root
   let l:ftail = expand('%:t:r') . '.' . a:ext
   let l:fname = simplify(l:fhead . '/' . l:ftail)
-  call mkdir(fnamemodify(l:fname, ':h'), 'p')
 
   try
+    call mkdir(fnamemodify(l:fname, ':h'), 'p')
     if a:ext == 'md'
       call writefile(l:md, l:fname)
     else
@@ -57,7 +59,7 @@ function! maki#page#update_toc() " {{{
 
   let l:toc = maki#util#get_headings(2)
   call map(l:toc, 'repeat("  ", v:val.level - 2) . "- [" . v:val.text . "]"')
-  call s:update_list('^\(\*\{2,3}\|_\{2,3}\)Contents\1\s*$', l:toc)
+  call s:update_list('Contents', l:toc)
 endfunction
 " }}}
 function! s:convert_links(func, ...) " {{{
@@ -86,12 +88,12 @@ endfunction
 function! s:update_list(head, body) " {{{
   " Update a list following a specified marker (or 'head').
   "
-  " Replaces a list that follows {head: regex} with {body: list}. Creates one
+  " Replaces a list that follows {head: string} with {body: list}. Creates one
   " if no such list is found.
 
   let l:curpos = getcurpos()[1:2]
   call cursor([1, 1])
-  let l:lnum_head = search(a:head, 'nc')
+  let l:lnum_head = search('^\(\*\{2,3}\|_\{2,3}\)'. a:head . '\1\s*$', 'nc')
   if !l:lnum_head | call cursor(l:curpos) | return | endif
   for l:lnum_until in range(l:lnum_head, line('$'))
     if getline(l:lnum_until + 1) !~ '^\s*$\|^\s*[-*+]\S\@!' | break | endif

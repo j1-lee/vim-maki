@@ -1,23 +1,22 @@
-function! maki#nav#goto_page(fname, ...) " {{{
+function! maki#nav#goto_page(name, ...) " {{{
   " Go to a wiki page.
   "
-  " {fname} should end with '.wiki'. The optional {where} specifies where to
-  " find the wiki page; if omitted or a value other than the following, then
-  " {fname} is understood to be relative to the wiki root. If {where} ==
-  " 'journal', then relative to g:maki_journal. If {where} == 'relative', then
-  " relative to the current page.
+  " {name} may or may not end with '.wiki'.
+  "
+  " If the optional {relative} == 1, then the path is relative to the current
+  " page. Otherwise the target page is relative to the wiki root.
+
+  let l:relative = a:0 ? a:1 : 0
+  let l:fname = (l:relative ? expand('%:h') : g:maki_root) . '/'
+        \ . (a:name =~ '\.wiki$' ? a:name : a:name . '.wiki')
+
   if &modified
     echomsg 'Can''t open the link; write the buffer first.'
     return
   endif
 
-  let l:prefix = !a:0 ? g:maki_root
-        \ : a:1 == 'journal'  ? g:maki_journal
-        \ : a:1 == 'relative' ? expand('%:h')
-        \ : g:maki_root " else, e.g., 'wiki', then default to g:maki_root
-
   call maki#nav#add_pos()
-  execute 'edit' fnameescape(l:prefix . '/' . a:fname)
+  execute 'edit' fnameescape(l:fname)
   augroup maki_mkdir_on_writing
     autocmd!
     autocmd BufWritePre <buffer> call mkdir(expand('%:h'), 'p')

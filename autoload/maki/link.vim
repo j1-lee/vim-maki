@@ -20,10 +20,8 @@ function! maki#link#get_link(...) " {{{
   "
   " If no argument is given, returns a link object found at the cursor
   " position. If not found, returns {}. If an argument {str} is given, returns
-  " the first link occurrence in {str}. In this case a dictionary is returned
-  " even when no link is found; one can check {return}.middle == ''.
-  "
-  " The link target is not normalized; call {return}.normalize() before use.
+  " the first link found in {str}. In this case a dictionary is returned even
+  " when no link is found; one can check {return}.middle == ''.
 
   if !a:0 " no argument given
     if maki#util#is_pre('.') | return {} | endif
@@ -41,7 +39,7 @@ function! maki#link#get_link(...) " {{{
         \ ['markdown', '\[\([^]]\+\)\](\([^)]*\))'],
         \ ['refdef',   '^\[\([^]]\+\)\]:\s\+\(.\+\)'],
         \ ['reflink',  '\[\([^]]\+\)\]\%(\[\([^]]*\)\]\)\?'],
-        \ ] " 'none' is not a link type; just used for skipping code areas
+        \ ] " 'none' is not a link type; just used to skip code areas
 
   let l:rx = join(map(copy(l:link_rxs), 'v:val[1]'), '\|')
   let [l:middle, l:start, l:end] = matchstrpos(a:1, l:rx)
@@ -59,13 +57,12 @@ function! maki#link#get_link(...) " {{{
           \ {'left': l:left, 'middle': l:middle, 'right': l:right})
   else
     let l:text = l:match[1]
-    let l:target = (l:match[2] == '') ? l:text : l:match[2]
+    let l:target = trim((l:match[2] == '') ? l:text : l:match[2])
     return {
           \ 'type': l:type,
           \ 'text': l:text, 'target': l:target,
           \ 'left': l:left, 'middle': l:middle, 'right': l:right,
           \ 'next': function('s:next'),
-          \ 'normalize': function('s:normalize'),
           \ 'open': function('s:open'),
           \ }
   endif
@@ -99,45 +96,33 @@ function! s:next() dict " {{{
   return l:link
 endfunction
 " }}}
-function! s:normalize() dict " {{{
-  " Make the link target more readily usable.
-  "
-  " For {type} == 'wiki', normalize the filename and add '.wiki'; for this
-  " type, the target is still relative to the wiki root (not to the current
-  " page). For {type} == 'reflink', fetch the definition.
-
-  if self.type == 'wiki'
-    let _ = substitute(self.target, '[^-_/0-9a-zA-Z\u00C0-\uFFFF]', '-', 'g')
-    let _ = substitute(_, '-\{2,}', '-', 'g')
-    let _ = trim(tolower(_), '-')
-    let self.target = _ . (_ =~ '/$' ? 'index.wiki' : '.wiki')
-  elseif self.type == 'reflink'
-    let [l:lnum, l:col] = searchpos('^\[\c' . self.target . '\]:\s\+', 'ne')
-    if l:lnum
-      let self.target = strpart(getline(l:lnum), l:col)
-    else " try headings
-      let l:headings = maki#util#get_headings(1)
-      let l:idx = index(map(copy(l:headings), 'v:val.text'), trim(self.target))
-      let self.target = l:idx >= 0 ? 'lnum:' . l:headings[l:idx].lnum : ''
-    endif
-  endif
-  let self.target = trim(self.target)
-endfunction
-" }}}
 function! s:open() dict " {{{
   " Well, open the link.
 
-  call self.normalize()
-  if self.target == ''
+  if self.type == 'wiki'
+    call maki#nav#goto_page(self.target)
     return
-  elseif self.target =~ '\.wiki$'
-    let l:where = (self.type == 'wiki') ? 'wiki' : 'relative'
-    call maki#nav#goto_page(self.target, l:where)
-  elseif self.target =~ '^lnum:\d\+$' " internal link
-    call maki#nav#add_pos()
-    execute 'normal!' matchstr(self.target, '\d\+') . 'Gzvzt'
+  elseif self.type == 'reflink' " resolve reference link
+    let [l:lnum, l:col] = searchpos('^\[\c' . self.target . '\]:\s\+', 'ne')
+    if l:lnum " if definition exists
+      let l:target = trim(strpart(getline(l:lnum), l:col))
+    else " try headings
+      let l:lnum = search('^#\+\s\+' . self.target, 'n')
+      if l:lnum
+        call maki#nav#add_pos()
+        execute 'normal!' l:lnum . 'Gzvzt'
+      endif
+      return
+    endif
   else
     let l:target = self.target
+  endif
+
+  if l:target == ''
+    return
+  elseif l:target =~ '\.wiki$'
+    call maki#nav#goto_page(l:target, 1)
+  else
     if l:target !~ '^https\?://\|^/'
       let l:target = expand('%:h') . '/' . l:target
     endif

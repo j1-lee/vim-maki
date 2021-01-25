@@ -11,6 +11,7 @@ command! -buffer MakiUpdateToc call maki#page#update_toc()
 nnoremap <buffer> <Plug>maki-export-markdown :MakiExportMarkdown<CR>
 nnoremap <buffer> <Plug>maki-export-html :MakiExportHtml<CR>
 nnoremap <buffer> <Plug>maki-export-html-view :MakiExportHtmlView<CR>
+nnoremap <buffer> <Plug>maki-update-toc :MakiUpdateToc<CR>
 
 nnoremap <buffer> <Plug>maki-]] :call maki#nav#next_heading(0, 0)<CR>
 nnoremap <buffer> <Plug>maki-[[ :call maki#nav#next_heading(1, 0)<CR>
