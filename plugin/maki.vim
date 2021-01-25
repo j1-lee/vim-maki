@@ -5,10 +5,10 @@ let g:maki_root = expand(get(g:, 'maki_root', '~/Wiki'))
 let g:maki_export = expand(get(g:, 'maki_export', '~/Wiki/export'))
 " }}}
 " Commands {{{
-command! MakiIndex call maki#nav#goto_page('index')
+command! -nargs=? MakiGo call maki#nav#goto_page(<q-args>)
 " }}}
 " <Plug> definitions {{{
-nnoremap <Plug>maki-index :MakiIndex<CR>
+nnoremap <Plug>maki-index :MakiGo<CR>
 " }}}
 " Key mappings {{{
 nmap <silent> <Leader>ww <Plug>maki-index

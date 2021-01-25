@@ -6,9 +6,11 @@ function! maki#nav#goto_page(name, ...) " {{{
   " If the optional {relative} == 1, then the path is relative to the current
   " page. Otherwise the target page is relative to the wiki root.
 
+  let l:name = a:name == '' ? 'index.wiki'
+        \ : a:name =~ '\.wiki$' ? a:name
+        \ : a:name . '.wiki'
   let l:relative = a:0 ? a:1 : 0
-  let l:fname = (l:relative ? expand('%:h') : g:maki_root) . '/'
-        \ . (a:name =~ '\.wiki$' ? a:name : a:name . '.wiki')
+  let l:fname = (l:relative ? expand('%:h') : g:maki_root) . '/' . l:name
 
   if &modified
     echomsg 'Can''t open the link; write the buffer first.'
