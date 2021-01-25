@@ -45,27 +45,20 @@ function! maki#nav#add_pos() " {{{
   let s:pos_prev = add(get(s:, 'pos_prev', []), [bufnr(), getcurpos()])
 endfunction
 " }}}
-function! maki#nav#next_heading(backwards, visual, ...) " {{{
+function! maki#nav#next_heading(backwards, visual) " {{{
   " Jump to the next (or previous) heading.
   "
   " Goes backward if {backwards} == 1. Restores visual area if {visual} == 1.
 
-  if a:0 " optional: jump to the line (internal use only)
-    call cursor(a:1, 1)
-  elseif a:visual
+  if a:visual
     normal! gv
   endif
 
-  let l:curpos = getcurpos()[1:2]
-  let l:next = search('^#\+\s', a:backwards ? 'nWb' : 'nW')
-  if !l:next | return | endif
-  if !maki#util#is_pre(l:next) " if not in a pre block
-    execute 'normal!' l:next . 'Gzvzt'
-  elseif !maki#nav#next_heading(a:backwards, a:visual, l:next) " search further
-    call cursor(l:curpos)
-    return
+  let [l:cmp, l:idx] = a:backwards ? ['<', -1] : ['>', 0]
+  let l:headings = maki#util#get_headings(1)
+  if !empty(filter(l:headings, 'v:val.lnum ' . l:cmp . ' line(".")'))
+    execute 'normal!' l:headings[l:idx].lnum . 'Gzvzt'
   endif
-  return l:next
 endfunction
 " }}}
 function! maki#nav#next_link(backwards) " {{{
