@@ -58,7 +58,10 @@ function! maki#page#update_toc() " {{{
   " '**Contents**' or '___Contents___'.
 
   let l:toc = maki#util#get_headings(2)
-  call map(l:toc, 'repeat("  ", v:val.level - 2) . "- [" . v:val.text . "]"')
+  call map(l:toc, '{
+        \ "text": "[" . v:val.text . "]",
+        \ "indent": (v:val.level - 2) * 2
+        \ }')
   call s:update_list('Contents', l:toc)
 endfunction
 " }}}
@@ -88,27 +91,31 @@ endfunction
 function! s:update_list(head, body) " {{{
   " Update a list following a specified marker (or 'head').
   "
-  " Replaces a list that follows {head: string} with {body: list}. Creates one
-  " if no such list is found.
+  " Replaces (or creates) a list after {head: string}, with items given as
+  " {body: list}. Each item of {body} is either string or dict. If string, it
+  " is added to the list with no indentation. If dict, its 'text' is added
+  " with 'indent' number of spaces prepended.
 
   let l:curpos = getcurpos()[1:2]
-  call cursor([1, 1])
   let l:lnum_head = search('^\(\*\{2,3}\|_\{2,3}\)'. a:head . '\1\s*$', 'nc')
-  if !l:lnum_head | call cursor(l:curpos) | return | endif
+  if !l:lnum_head | return | endif
   for l:lnum_until in range(l:lnum_head, line('$'))
     if getline(l:lnum_until + 1) !~ '^\s*$\|^\s*[-*+]\S\@!' | break | endif
   endfor
   let l:add_nl_afterwards = l:lnum_until != line('$')
-  let l:cursor_after_toc = l:curpos[0] > l:lnum_until
+  let l:cursor_after_list = l:curpos[0] > l:lnum_until
   let l:lines_added = l:lnum_head - l:lnum_until
   if l:lines_added < 0
     execute 'keepjumps' l:lnum_head . '+1,' . l:lnum_until . 'delete _'
   endif
-  let l:body = insert(a:body, '')
-  if l:add_nl_afterwards | call add(l:body, '') | endif
-  call append(l:lnum_head, l:body)
-  let l:lines_added += len(l:body)
-  if l:cursor_after_toc | let l:curpos[0] += l:lines_added | endif
+  call map(a:body, 'type(v:val) == v:t_dict
+        \ ? repeat(" ", v:val.indent) . "- " . v:val.text : "- " . v:val
+        \ ')
+  call insert(a:body, '')
+  if l:add_nl_afterwards | call add(a:body, '') | endif
+  call append(l:lnum_head, a:body)
+  let l:lines_added += len(a:body)
+  if l:cursor_after_list | let l:curpos[0] += l:lines_added | endif
   call cursor(l:curpos)
 endfunction
 " }}}
