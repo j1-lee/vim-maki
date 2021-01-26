@@ -35,7 +35,7 @@ function! maki#nav#go_back() " {{{
     call setpos('.', l:pos)
   catch /E37/
     echomsg 'Can''t go back; write the buffer first.'
-    call add(s:pos_prev, l:pos)
+    call add(s:pos_prev, [l:bufnr, l:pos])
   catch /E86/ " no such buffer
   endtry
 endfunction
