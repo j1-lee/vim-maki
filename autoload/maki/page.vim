@@ -26,7 +26,8 @@ function! maki#page#export(ext, view) " {{{
     endif
   endfunction
 
-  let l:md = s:convert_links(function('s:to_markdown'), a:ext, l:to_root)
+  let l:md = s:convert_links(getline(1, '$'), function('s:to_markdown'),
+        \ a:ext, l:to_root)
 
   let l:fhead = g:maki_export . '/' . l:from_root
   let l:ftail = expand('%:t:r') . '.' . a:ext
@@ -51,6 +52,48 @@ function! maki#page#export(ext, view) " {{{
   if a:view | call system('xdg-open ' . shellescape(l:fname)) | endif
 endfunction
 " }}}
+function! maki#page#rename() " {{{
+  " Rename the current page and update all wiki links pointing to it.
+  "
+  " Does not update non-wiki links; those might need manual updating.
+
+  let l:from_root = maki#util#relative_to_root()[0]
+  if l:from_root == ''
+    echomsg 'Cannot rename a wiki page outside the wiki root.'
+    return
+  endif
+
+  let l:from = expand('%:t:r')
+  if l:from_root != '.' | let l:from = l:from_root . '/' . l:from | endif
+
+  let l:to = trim(input('Rename this page to: ', l:from))
+  if l:to == '' || l:to == l:from | return | endif
+  let l:fname = g:maki_root . '/' . l:to . '.wiki'
+  if filewritable(l:fname)
+        \ && confirm(l:to . ' exists. Overwrite it?', "&Yes\n&No", 2) != 1
+    return
+  endif
+
+  execute 'saveas!' fnameescape(l:fname)
+
+  function! s:rename_to(from, to, modified) dict
+    if self.type == 'wiki' && self.target == a:from
+      let self.middle = '[[' . a:to. ']]'
+      call add(a:modified, 1)
+    endif
+  endfunction
+
+  for l:fname in glob(g:maki_root . '/**/*.wiki', 0, 1)
+    let l:modified = []
+    let l:output = s:convert_links(readfile(l:fname), function('s:rename_to'),
+          \ l:from, l:to, l:modified)
+    if !empty(l:modified)
+      call writefile(l:output, l:fname)
+      echomsg 'Updated' l:fname
+    endif
+  endfor
+endfunction
+" }}}
 function! maki#page#update_toc() " {{{
   " Update the table of contents.
   "
@@ -65,7 +108,7 @@ function! maki#page#update_toc() " {{{
   call s:update_list('Contents', l:toc)
 endfunction
 " }}}
-function! s:convert_links(func, ...) " {{{
+function! s:convert_links(lines, func, ...) " {{{
   " Loop over all links in the page and convert them according to {func}.
   "
   " {func} is a dict function which may have auxiliary arguments if necessary;
@@ -74,10 +117,10 @@ function! s:convert_links(func, ...) " {{{
   " directly modifying 'self.middle' etc. Returns the converted page as a list.
 
   let l:output = []
-  let l:is_pre = maki#util#is_pre()
-  for l:lnum in range(1, line('$'))
-    let l:line = getline(l:lnum)
-    if l:is_pre[l:lnum - 1] | call add(l:output, l:line) | continue | endif
+  let l:is_pre = maki#util#is_pre(a:lines)
+  for l:idx in range(len(a:lines))
+    let l:line = a:lines[l:idx]
+    if l:is_pre[l:idx] | call add(l:output, l:line) | continue | endif
     let l:link = maki#link#get_link(l:line)
     while l:link.middle != ''
       call call(a:func, a:000, l:link)

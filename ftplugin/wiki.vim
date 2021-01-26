@@ -5,6 +5,7 @@ setlocal foldexpr=maki#util#foldlevel(v:lnum) foldtext=getline(v:foldstart)
 command! -buffer MakiExportMarkdown call maki#page#export('md', 0)
 command! -buffer MakiExportHtml call maki#page#export('html', 0)
 command! -buffer MakiExportHtmlView call maki#page#export('html', 1)
+command! -buffer MakiRename call maki#page#rename()
 command! -buffer MakiUpdateToc call maki#page#update_toc()
 " }}}
 " <Plug> definitions {{{

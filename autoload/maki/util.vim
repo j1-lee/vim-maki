@@ -10,15 +10,19 @@ endfunction
 function! maki#util#is_pre(...) " {{{
   " Check whether a line is inside a pre block.
 
-  " The optional argument {lnum} can be a number, '.', or '$'. If no argument
-  " is given, returns a list for all lines in the buffer.
+  " The optional argument can be (i) a number, '.', or '$', or (ii) a list of
+  " strings. In the latter case, the input is used as the text instead of the
+  " buffer, and a list is returned. If no argument is given, returns a list
+  " for all lines in the buffer.
 
   " The syntax rule is more stringent than pandoc markdown; the corresponding
   " fences must have the same indent and the same number of backticks.
 
+  let l:lines = !a:0 ? getline(1, '$')
+        \ : type(a:1) == v:t_list ? a:1 : getline(1, a:1)
   let l:output = []
   let l:is_pre = 0
-  for l:line in getline(1, a:0 ? a:1 : '$')
+  for l:line in l:lines
     let l:match = matchlist(l:line, '^\(\s*\)\(`\{3,}\)\s*\(.*\)')
     if empty(l:match) | call add(l:output, l:is_pre) | continue | endif
     if l:is_pre
@@ -33,7 +37,7 @@ function! maki#util#is_pre(...) " {{{
     endif
   endfor
 
-  return a:0 ? l:output[-1] : l:output
+  return a:0 && type(a:1) != v:t_list ? l:output[-1] : l:output
 endfunction
 " }}}
 function! maki#util#relative_to_root() " {{{
