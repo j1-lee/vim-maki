@@ -108,6 +108,30 @@ function! maki#page#update_toc() " {{{
   call s:update_list('Contents', l:toc)
 endfunction
 " }}}
+function! maki#page#update_subpage() " {{{
+  " Update the list of subpages.
+  "
+  " Creates or updates the list of subpages after a strongly emphasized word
+  " 'Subpages'. It might be useful for navigating between journal pages.
+
+  let l:from_root = maki#util#relative_to_root()[0]
+  if l:from_root == ''
+    echomsg 'Cannot do this outside the wiki root.'
+    return
+  else
+    let l:this_page = expand('%:t:r')
+    if l:from_root != '.'
+      let l:this_page = l:from_root . '/' . l:this_page
+    endif
+  endif
+
+  let l:pages = glob(expand('%:p:r') . '/*.wiki', 0, 1)
+  call map(l:pages,
+        \ '"[[" . l:this_page . "/" . fnamemodify(v:val, ":t:r") . "]]"')
+
+  call s:update_list('Subpages', l:pages)
+endfunction
+" }}}
 function! s:convert_links(lines, func, ...) " {{{
   " Loop over all links in the page and convert them according to {func}.
   "

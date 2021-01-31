@@ -7,6 +7,7 @@ command! -buffer MakiExportHtml call maki#page#export('html', 0)
 command! -buffer MakiExportHtmlView call maki#page#export('html', 1)
 command! -buffer MakiRename call maki#page#rename()
 command! -buffer MakiUpdateToc call maki#page#update_toc()
+command! -buffer MakiUpdateSubpage call maki#page#update_subpage()
 " }}}
 " <Plug> definitions {{{
 nnoremap <buffer> <Plug>maki-export-markdown :MakiExportMarkdown<CR>
