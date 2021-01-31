@@ -40,6 +40,7 @@ function! maki#page#export(ext, ...) " {{{
     else
       let l:cmd = 'pandoc --from=markdown --output=' . shellescape(l:fname)
       let l:cmd .= ' --standalone --shift-heading-level-by=-1'
+      let l:cmd .= ' --metadata=title:' . shellescape(expand('%:t:r'))
       if a:ext == 'html' | let l:cmd .= ' --mathjax' | endif
       let l:pipeout = join(systemlist(l:cmd, l:md))
       if v:shell_error | throw l:pipeout | endif
