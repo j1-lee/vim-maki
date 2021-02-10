@@ -108,6 +108,8 @@ endfor
 " Math block; define this AFTER makiMathInline {{{
 syntax region makiMathDisplay keepend contains=@texMathZoneGroup,@texClusterMath
       \ matchgroup=makiMathDisplayDelim start='\$\$' end='\$\$'
+syntax region makiMathDisplay keepend contains=@texMathZoneGroup,@texClusterMath
+      \ matchgroup=makiMathDisplayDelim start='\\begin{\z(\w\+\)}' end='\\end{\z1}'
 highlight link makiMathDisplay Special
 highlight link makiMathDisplayDelim makiMathDelim
 " }}}
