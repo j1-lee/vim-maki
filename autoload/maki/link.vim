@@ -4,7 +4,7 @@ function! maki#link#try_link(visual) " {{{
   " Restores visual area if {visual} == 1.
 
   let l:link = maki#link#get_link()
-  if empty(l:link)
+  if l:link.middle == ''
     call s:create_link(a:visual)
   else
     try
@@ -18,19 +18,18 @@ endfunction
 function! maki#link#get_link(...) " {{{
   " Get a link at the cursor or in a string.
   "
-  " If no argument is given, returns a link object found at the cursor
-  " position. If not found, returns {}. If an argument {str} is given, returns
-  " the first link found in {str}. In this case a dictionary is returned even
-  " when no link is found; one can check {return}.middle == ''.
+  " If no argument is given, then return the link at the current cursor. If an
+  " optional argument {str} is given, then return the first link in the given
+  " string. If no such link is found, then {return}.middle is an empty string.
 
   if !a:0 " no argument given
     if maki#util#is_pre('.') | return {} | endif
     let l:link = maki#link#get_link(getline('.'))
     while l:link.middle != '' && len(l:link.left) < col('.')
-      if len(l:link.left . l:link.middle) >= col('.') | return l:link | endif
+      if len(l:link.left . l:link.middle) >= col('.') | break | endif
       let l:link = l:link.next()
     endwhile
-    return {} " nothing found
+    return l:link
   endif
 
   let l:link_rxs = [
