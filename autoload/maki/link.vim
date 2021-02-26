@@ -26,10 +26,10 @@ function! maki#link#get_link(...) " {{{
     if maki#util#is_pre('.') | return {} | endif
     let l:link = maki#link#get_link(getline('.'))
     while l:link.middle != '' && len(l:link.left) < col('.')
-      if len(l:link.left . l:link.middle) >= col('.') | break | endif
+      if len(l:link.left . l:link.middle) >= col('.') | return l:link | endif
       let l:link = l:link.next()
     endwhile
-    return l:link
+    return {'left': getline('.'), 'middle': ''}
   endif
 
   let l:link_rxs = [
