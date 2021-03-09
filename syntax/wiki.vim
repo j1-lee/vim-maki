@@ -18,15 +18,12 @@ endfor
 " Cluster (inline formatting, link, and miscellaneous) {{{
 syntax cluster makiText contains=makiItalic,makiBold,makiCode,makiMathInline
 syntax cluster makiText add=makiLink
-syntax cluster makiText add=makiNumber,makiBr,makiUrl,@Spell
+syntax cluster makiText add=makiNumber,makiBr,@Spell
 " }}}
 " Miscellaneous {{{
 " number
 syntax match makiNumber '\<\d\+\%(,\d\{3}\)*\%(\.\d\+\)\?\>'
 highlight link makiNumber Number
-" url
-syntax match makiUrl 'https\?://[.a-zA-Z0-9%!?=&#\-+*/:()]\+'
-highlight link makiUrl Underlined
 " line break
 syntax match makiBr '\\$'
 highlight link makiBr Conceal
@@ -63,6 +60,8 @@ syntax region makiLink oneline nextgroup=makiTarget contains=@Spell
       \ matchgroup=makiLinkDelim start='!\?\[' end='\]'
 syntax region makiLink oneline contains=@Spell
       \ matchgroup=makiLinkDelim start='\[\[' end='\]\]'
+syntax match makiLink '<https\?://[.a-zA-Z0-9%!?=&#\-+*/:()]\+>' contains=makiLinkDelim
+syntax match makiLinkDelim '[<>]' contained
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='(' end=')'
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='\[' end='\]'
 highlight link makiLink Underlined
