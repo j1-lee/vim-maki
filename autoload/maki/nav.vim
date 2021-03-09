@@ -63,10 +63,24 @@ function! maki#nav#next_heading(backwards, visual) " {{{
 endfunction
 " }}}
 function! maki#nav#next_link(backwards) " {{{
-  " Jump to the next link.
-  "
-  " This is crude; jumps also to inline code areas or pre blocks as well.
+  " Jump to the next (or prev) link in the current line.
 
-  call search('\]\@<!\[[^]]*\]', a:backwards ? 'b' : '')
+  if maki#util#is_pre('.') | return {} | endif
+  let l:link = maki#link#get_link(getline('.'))
+  while l:link.middle != ''
+    let l:next = l:link.next()
+    if !a:backwards
+      if len(l:link.left) >= col('.')
+        call cursor('.', len(l:link.left) + 1)
+        return
+      endif
+    else " backwards
+      if len(l:next.left . l:next.middle) >= col('.')
+        call cursor('.', min([col('.'), len(l:link.left . l:link.middle)]))
+        return
+      endif
+    endif
+    let l:link = l:next
+  endwhile
 endfunction
 " }}}
