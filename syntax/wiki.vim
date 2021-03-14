@@ -11,7 +11,7 @@ highlight link makiCommentDelim makiDelim
 for s:i in range(1, 6)
   execute 'syntax region makiHeading'.s:i 'oneline contains=@Spell'
         \ 'matchgroup=makiHeadingMarker'.s:i 'start=/^#\{'.s:i.'}\s\+/' 'end=/$/'
-  execute 'highlight link makiHeading'.s:i.' '.(s:i <= 2 ? 'Title' : 'MoreMsg')
+  execute 'highlight link makiHeading'.s:i 'markdownH'.s:i
   execute 'highlight link makiHeadingMarker'.s:i 'makiHeading'.s:i
 endfor
 " }}}
@@ -26,7 +26,7 @@ syntax match makiNumber '\<\d\+\%(,\d\{3}\)*\%(\.\d\+\)\?\>'
 highlight link makiNumber Number
 " line break
 syntax match makiBr '\\$'
-highlight link makiBr Conceal
+highlight link makiBr makiDelim
 " }}}
 " Inline formatting {{{
 " italic
@@ -38,16 +38,16 @@ execute 'syntax region makiItalic oneline skip=/\\_/ contains=makiLink,@Spell'
 let s:rx = '/\%(\s\@<!\*\|\*\s\@!\)/'
 execute 'syntax region makiItalic oneline skip=/\\\*/ contains=makiLink,@Spell'
       \ 'matchgroup=makiItalicDelim' 'start='.s:rx 'end='.s:rx
-highlight makiItalic term=italic cterm=italic gui=italic
+highlight link makiItalic markdownItalic
 highlight link makiItalicDelim makiTextDelim
 " bold
 syntax region makiBold oneline contains=makiLink,@Spell
       \ matchgroup=makiBoldDelim start='\z(\*\*\)' start='\z(__\)' end='\z1'
-highlight makiBold term=bold cterm=bold gui=bold
+highlight link makiBold markdownBold
 highlight link makiBoldDelim makiTextDelim
 " code
 syntax region makiCode oneline matchgroup=makiCodeDelim start='\z(`\+\)' end='\z1'
-highlight link makiCode PreProc
+highlight link makiCode markdownCode
 highlight link makiCodeDelim makiTextDelim
 " inline math; explicitly depend on lervag/vimtex, fall back on default syntax
 syntax region makiMathInline oneline keepend contains=@texMathZoneGroup,@texClusterMath
@@ -64,8 +64,8 @@ syntax match makiLink '<https\?://[.a-zA-Z0-9%!?=&#\-+*/:()]\+>' contains=makiLi
 syntax match makiLinkDelim '[<>]' contained
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='(' end=')'
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='\[' end='\]'
-highlight link makiLink Underlined
-highlight link makiTarget Conceal
+highlight link makiLink markdownLinkText
+highlight link makiTarget NonText
 highlight link makiLinkDelim makiDelim
 highlight link makiTargetDelim makiLinkDelim
 highlight link makiImageDelim makiLinkDelim
@@ -74,13 +74,13 @@ highlight link makiImageDelim makiLinkDelim
 syntax region makiRefLabel oneline nextgroup=makiRefTarget
       \ matchgroup=makiLinkDelim start='^\[' end='\]:\ze\s\+'
 syntax match makiRefTarget '.\+' contained
-highlight link makiRefLabel Comment
-highlight link makiRefTarget Conceal
+highlight link makiRefLabel markdownIdDeclaration
+highlight link makiRefTarget NonText
 " }}}
 " Pre block - generic {{{
 syntax region makiPre keepend
       \ matchgroup=makiPreDelim start='^\z(\s*`\{3,}\).*$' end='^\z1\s*$'
-highlight link makiPre PreProc
+highlight link makiPre markdownCodeBlock
 highlight link makiPreDelim makiDelim
 " }}}
 " Pre block - nested syntax {{{
@@ -115,14 +115,14 @@ highlight link makiMathDisplayDelim makiMathDelim
 " Block quote {{{
 syntax region makiQuote oneline contains=@makiText
       \ matchgroup=makiQuoteMarker start='^\s*>' end='$'
-highlight link makiQuote String
-highlight link makiQuoteMarker Conceal
+highlight link makiQuote markdownBlockquote
+highlight link makiQuoteMarker NonText
 " }}}
 " List {{{
 syntax region makiList oneline contains=@makiText
       \ matchgroup=makiListMarker start='^\s*\%([-*+]\|\d\+\.\)\ze\_s'
       \ matchgroup=NONE end='$' keepend
-highlight link makiListMarker Identifier
+highlight link makiListMarker markdownListMarker
 " }}}
 " Table {{{
 syntax match makiTableBody '^\s*|.\+|\s*$' contained
@@ -139,7 +139,7 @@ highlight link makiTableRule makiTableDelim
 " Delimiters {{{
 highlight link makiTextDelim makiDelim
 highlight link makiMathDelim makiDelim
-highlight link makiDelim Conceal
+highlight link makiDelim NonText
 " }}}
 
 let b:current_syntax = 'wiki'
