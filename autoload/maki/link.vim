@@ -38,7 +38,7 @@ function! maki#link#get_link(...) " {{{
         \ ['markdown', '\[\([^]]\+\)\](\([^)]*\))'],
         \ ['refdef',   '^\[\([^]]\+\)\]:\s\+\(.\+\)'],
         \ ['reflink',  '\[\([^]]\+\)\]\%(\[\([^]]*\)\]\)\?'],
-        \ ['http',     '<\(https\?://[.a-zA-Z0-9%!?=&#\-+*/:()]\+\)>'],
+        \ ['http',     '<\(https\?://[.a-zA-Z0-9%!?=&#_\-+*/:()]\+\)>'],
         \ ] " 'none' is not a link type; just used to skip code areas
 
   let l:rx = join(map(copy(l:link_rxs), 'v:val[1]'), '\|')
