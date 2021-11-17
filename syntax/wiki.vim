@@ -16,7 +16,7 @@ for s:i in range(1, 6)
 endfor
 " }}}
 " Cluster (inline formatting, link, and miscellaneous) {{{
-syntax cluster makiText contains=makiItalic,makiBold,makiCode,makiMathInline
+syntax cluster makiText contains=makiItalic,makiBold,makiCode,makiMathInline,makiStrike
 syntax cluster makiText add=makiLink
 syntax cluster makiText add=makiNumber,makiBr,@Spell
 " }}}
@@ -49,6 +49,10 @@ highlight link makiBoldDelim makiTextDelim
 syntax region makiCode oneline matchgroup=makiCodeDelim start='\z(`\+\)' end='\z1'
 highlight link makiCode markdownCode
 highlight link makiCodeDelim makiTextDelim
+" strikethrough
+syntax region makiStrike oneline matchgroup=makiStrikeDelim start='\~\~' end='\~\~'
+highlight link makiStrike makiComment
+highlight link makiStrikeDelim makiTextDelim
 " inline math; explicitly depend on lervag/vimtex, fall back on default syntax
 syntax region makiMathInline oneline keepend contains=@texMathZoneGroup,@texClusterMath
       \ matchgroup=makiMathInlineDelim start='\$\ze\S' end='\S\zs\$\ze\_D' skip='\\\$'
