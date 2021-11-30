@@ -3,6 +3,7 @@ function! maki#link#try_link(visual) " {{{
   "
   " Restores visual area if {visual} == 1.
 
+  if maki#util#is_pre('.') | return | endif
   let l:link = maki#link#get_link()
   if l:link.middle == ''
     call s:create_link(a:visual)
@@ -23,7 +24,6 @@ function! maki#link#get_link(...) " {{{
   " string. If no such link is found, then {return}.middle is an empty string.
 
   if !a:0 " no argument given
-    if maki#util#is_pre('.') | return {} | endif
     let l:link = maki#link#get_link(getline('.'))
     while l:link.middle != '' && len(l:link.left) < col('.')
       if len(l:link.left . l:link.middle) >= col('.') | return l:link | endif
