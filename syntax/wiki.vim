@@ -64,7 +64,7 @@ syntax region makiLink oneline nextgroup=makiTarget contains=@Spell
       \ matchgroup=makiLinkDelim start='!\?\[' end='\]'
 syntax region makiLink oneline contains=@Spell
       \ matchgroup=makiLinkDelim start='\[\[' end='\]\]'
-syntax match makiLink '<https\?://[.a-zA-Z0-9%!?=&#_\-+*/:()]\+>' contains=makiLinkDelim
+syntax match makiLink '<https\?://[.a-zA-Z0-9%!?=&#_\-+*/:()~]\+>' contains=makiLinkDelim
 syntax match makiLinkDelim '[<>]' contained
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='(' end=')'
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='\[' end='\]'
