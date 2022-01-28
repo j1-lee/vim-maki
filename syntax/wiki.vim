@@ -118,7 +118,7 @@ highlight link makiMathDisplayDelim makiMathDelim
 " }}}
 " Block quote {{{
 syntax region makiQuote oneline contains=@makiText
-      \ matchgroup=makiQuoteMarker start='^\s*>' end='$'
+      \ matchgroup=makiQuoteMarker start='^\s*>' end='$' keepend
 highlight link makiQuote markdownBlockquote
 highlight link makiQuoteMarker NonText
 " }}}
