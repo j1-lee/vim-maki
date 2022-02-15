@@ -46,14 +46,8 @@ function! maki#nav#add_pos() " {{{
   let s:pos_prev = add(get(s:, 'pos_prev', []), [bufnr(), getcurpos()])
 endfunction
 " }}}
-function! maki#nav#next_heading(backwards, visual) " {{{
+function! maki#nav#next_heading(backwards) " {{{
   " Jump to the next (or previous) heading.
-  "
-  " Goes backward if {backwards} == 1. Restores visual area if {visual} == 1.
-
-  if a:visual
-    normal! gv
-  endif
 
   let [l:cmp, l:idx] = a:backwards ? ['<', -1] : ['>', 0]
   let l:headings = maki#util#get_headings(1)

@@ -1,12 +1,10 @@
-function! maki#link#try_link(visual) " {{{
+function! maki#link#try_link() " {{{
   " Get a link at the cursor position or create one.
-  "
-  " Restores visual area if {visual} == 1.
 
   if maki#util#is_pre('.') | return | endif
   let l:link = maki#link#get_link()
   if l:link.middle == ''
-    call s:create_link(a:visual)
+    call s:create_link()
   else
     try
       call l:link.open()
@@ -68,17 +66,11 @@ function! maki#link#get_link(...) " {{{
   endif
 endfunction
 " }}}
-function! s:create_link(visual) " {{{
+function! s:create_link() " {{{
   " Create a (wiki) link at the cursor position or the visual area.
-  "
-  " If {visual} == 1, then restores the visual area.
 
-  if a:visual
-    let l:rx = visualmode() ==# 'V' ? '.\+' : '\%(\%V.\)\+'
-  else
-    let l:rx = '\k*\%' . col('.') . 'c\k*'
-  endif
-
+  let l:rx = get({'v': '\%(\%V.\)\+', 'V': '.\+'},
+        \ mode(), '\k*\%' . col('.') . 'c\k*')
   let [l:match, l:start, l:end] = matchstrpos(getline('.'), l:rx)
   if l:match == '' | return | endif
 
