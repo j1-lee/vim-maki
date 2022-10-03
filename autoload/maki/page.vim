@@ -2,7 +2,9 @@ function! maki#page#export(ext, ...) " {{{
   " Export wiki to other formats (determined by {ext}).
   "
   " Preserves wiki directory structure; so can't do it outside the wiki root.
-  " If optional argument {view} == 1, shows the result afterwards.
+  " Optional arguments are {showmsg} and {view}:
+  "   if {showmsg} == 1, show the message 'Exported the page to ...'
+  "   if {view} == 1, view the result afterwards (using xdg-open).
 
   let [l:from_root, l:to_root] = maki#util#relative_to_root()
   if l:from_root == ''
@@ -49,8 +51,9 @@ function! maki#page#export(ext, ...) " {{{
     echohl ErrorMsg | echomsg v:exception | echohl None
     return
   endtry
-  echomsg 'Exported the page to' l:fname
-  if a:0 && a:1 | call system('xdg-open ' . shellescape(l:fname)) | endif
+
+  if a:0 >= 1 && a:1 | echomsg 'Exported the page to' l:fname | endif
+  if a:0 >= 2 && a:2 | call system('xdg-open ' . shellescape(l:fname)) | endif
 endfunction
 " }}}
 function! maki#page#rename() " {{{

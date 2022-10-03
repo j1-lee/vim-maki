@@ -2,9 +2,9 @@ setlocal foldmethod=expr
 setlocal foldexpr=maki#util#foldlevel(v:lnum) foldtext=getline(v:foldstart)
 
 " Commands {{{
-command! -buffer MakiExportMarkdown call maki#page#export('md', 0)
-command! -buffer MakiExportHtml call maki#page#export('html', 0)
-command! -buffer MakiExportHtmlView call maki#page#export('html', 1)
+command! -buffer MakiExportMarkdown call maki#page#export('md', 1)
+command! -buffer MakiExportHtml call maki#page#export('html', 1)
+command! -buffer MakiExportHtmlView call maki#page#export('html', 1, 1)
 command! -buffer MakiRename call maki#page#rename()
 command! -buffer MakiUpdateToc call maki#page#update_toc()
 command! -buffer MakiUpdateSubpage call maki#page#update_subpage()
@@ -36,4 +36,12 @@ nmap <buffer> <silent> <BS> <Plug>maki-go-back
 
 nmap <buffer> <silent> <Tab> <Plug>maki-next-link
 nmap <buffer> <silent> <S-Tab> <Plug>maki-prev-link
+" }}}
+" Autocmds {{{
+augroup MakiAutoExport
+  autocmd! * <buffer>
+  if g:maki_auto_export
+    autocmd BufWritePost <buffer> call maki#page#export('html')
+  endif
+augroup END
 " }}}
