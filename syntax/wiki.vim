@@ -11,7 +11,7 @@ highlight link makiCommentDelim makiDelim
 for s:i in range(1, 6)
   execute 'syntax region makiHeading'.s:i 'oneline contains=@Spell'
         \ 'matchgroup=makiHeadingMarker'.s:i 'start=/^#\{'.s:i.'}\s\+/' 'end=/$/'
-  execute 'highlight link makiHeading'.s:i 'markdownH'.s:i
+  execute 'highlight link makiHeading'.s:i 'Title'
   execute 'highlight link makiHeadingMarker'.s:i 'makiHeading'.s:i
 endfor
 " }}}
@@ -38,12 +38,12 @@ execute 'syntax region makiItalic oneline skip=/\\_/ contains=makiLink,@Spell'
 let s:rx = '/\%(\s\@<!\*\|\*\s\@!\)/'
 execute 'syntax region makiItalic oneline skip=/\\\*/ contains=makiLink,@Spell'
       \ 'matchgroup=makiItalicDelim' 'start='.s:rx 'end='.s:rx
-highlight link makiItalic markdownItalic
+highlight link makiItalic Italic
 highlight link makiItalicDelim makiTextDelim
 " bold
 syntax region makiBold oneline contains=makiLink,@Spell
       \ matchgroup=makiBoldDelim start='\z(\*\*\)' start='\z(__\)' end='\z1'
-highlight link makiBold markdownBold
+highlight link makiBold Bold
 highlight link makiBoldDelim makiTextDelim
 " code
 syntax region makiCode oneline matchgroup=makiCodeDelim start='\z(`\+\)' end='\z1'
@@ -68,17 +68,19 @@ syntax match makiLink '<https\?://[.a-zA-Z0-9%!?=&#_\-+*/:()~]\+>' contains=maki
 syntax match makiLinkDelim '[<>]' contained
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='(' end=')'
 syntax region makiTarget oneline contained matchgroup=makiTargetDelim start='\[' end='\]'
-highlight link makiLink markdownLinkText
+highlight link makiLink Underlined
 highlight link makiTarget NonText
 highlight link makiLinkDelim makiDelim
 highlight link makiTargetDelim makiLinkDelim
 highlight link makiImageDelim makiLinkDelim
 " }}}
-" Link reference definition {{{
+" Link reference definition (and footnote) {{{
 syntax region makiRefLabel oneline nextgroup=makiRefTarget
       \ matchgroup=makiLinkDelim start='^\[' end='\]:\ze\s\+'
+syntax region makiRefLabel oneline
+      \ matchgroup=makiLinkDelim start='^\[\^' end='\]:\ze\s\+'
 syntax match makiRefTarget '.\+' contained
-highlight link makiRefLabel markdownIdDeclaration
+highlight link makiRefLabel Type
 highlight link makiRefTarget NonText
 " }}}
 " Pre block - generic {{{
@@ -119,14 +121,14 @@ highlight link makiMathDisplayDelim makiMathDelim
 " Block quote {{{
 syntax region makiQuote oneline contains=@makiText
       \ matchgroup=makiQuoteMarker start='^\s*>' end='$' keepend
-highlight link makiQuote markdownBlockquote
+highlight link makiQuote String
 highlight link makiQuoteMarker NonText
 " }}}
 " List {{{
 syntax region makiList oneline contains=@makiText
       \ matchgroup=makiListMarker start='^\s*\%([-*+]\|\d\+\.\)\ze\_s'
       \ matchgroup=NONE end='$' keepend
-highlight link makiListMarker markdownListMarker
+highlight link makiListMarker Statement
 " }}}
 " Table {{{
 syntax match makiTableBody '^\s*|.\+|\s*$' contained
