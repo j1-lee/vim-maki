@@ -12,5 +12,5 @@ command! -nargs=? MakiGo call maki#nav#goto_page(<q-args>)
 nnoremap <Plug>maki-index :MakiGo<CR>
 " }}}
 " Key mappings {{{
-nmap <silent> <Leader>w <Plug>maki-index
+nmap <silent> <Leader>ww <Plug>maki-index
 " }}}
