@@ -75,3 +75,13 @@ function! maki#util#get_headings(minlevel) " {{{
   return l:headings
 endfunction
 " }}}
+function! maki#util#toggle_checkbox() " {{{
+  let l:line = substitute(
+        \ getline('.'),
+        \ '^\s*\%([-*+]\|\d\+\.\)\s\+\[\zs\([ x]\)\ze\]',
+        \ '\=submatch(1) == " " ? "x" : " "',
+        \ 'e'
+        \ )
+  call setline('.', l:line)
+endfunction
+" }}}
