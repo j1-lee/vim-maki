@@ -125,10 +125,13 @@ highlight link makiQuote String
 highlight link makiQuoteMarker NonText
 " }}}
 " List {{{
-syntax region makiList oneline contains=@makiText
-      \ matchgroup=makiListMarker start='^\s*\%([-*+]\|\d\+\.\)\ze\_s'
-      \ matchgroup=NONE end='$' keepend
+syntax match makiListMarker '^\s*\%([-*+]\|\d\+\.\)\_s\+' nextgroup=makiCheckbox
+syntax match makiCheckbox '\[[ x]\]' contained contains=makiCheckboxDelim
+syntax match makiCheckboxDelim '[\[\]]' contained
+
 highlight link makiListMarker Statement
+highlight link makiCheckbox Boolean
+highlight link makiCheckboxDelim makiDelim
 " }}}
 " Table {{{
 syntax match makiTableBody '^\s*|.\+|\s*$' contained
