@@ -12,11 +12,6 @@ function! maki#nav#goto_page(name, ...) " {{{
   let l:relative = a:0 ? a:1 : 0
   let l:fname = (l:relative ? expand('%:h') : g:maki_root) . '/' . l:name
 
-  if &modified
-    echomsg 'Can''t open the link; write the buffer first.'
-    return
-  endif
-
   call maki#nav#add_pos()
   execute 'edit' fnameescape(l:fname)
   augroup maki_mkdir_on_writing
@@ -33,9 +28,6 @@ function! maki#nav#go_back() " {{{
     let [l:bufnr, l:pos] = remove(s:pos_prev, -1)
     execute 'buffer' l:bufnr
     call setpos('.', l:pos)
-  catch /E37/
-    echomsg 'Can''t go back; write the buffer first.'
-    call add(s:pos_prev, [l:bufnr, l:pos])
   catch /E86/ " no such buffer
   endtry
 endfunction
