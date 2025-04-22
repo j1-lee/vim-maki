@@ -1,1 +1,1 @@
-autocmd BufNewFile,BufRead *.wiki setfiletype wiki
+lua vim.filetype.add({ extension = { wiki = 'wiki' } })
